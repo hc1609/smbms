@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smbms.role.dao.RoleMapper">
+	<insert id="addRole" parameterType="role">
+		insert into smbms_role values(#{id},#{roleCode},#{roleName},#{createdBy},#{creationDate},#{modifyBy},#{modifyDate})
+	</insert>
+	<update id="updateRole" parameterType="role">
+		update smbms_role 
+		<set>
+			<if test="roleCode !=null">roleCode=#{roleCode},</if>
+			<if test="roleName !=null">roleName=#{roleName},</if>
+			<if test="createdBy !=null">createdBy=#{createdBy},</if>
+			<if test="creationDate">creationDate=#{creationDate},</if>
+			<if test="modifyBy">modifyBy=#{modifyBy},</if>
+			<if test="modifyDate">modifyDate=#{modifyDate}</if>
+		</set>
+		where id=#{id};
+	</update>
+	<delete id="deleteRole">
+		delete from smbms_role where id=#{id};
+	</delete>
+	<select id="selectByName" resultType="role">
+		select * from smbms_role
+	<trim prefix="where" prefixOverrides="and | or" suffix="order by creationDate DESC limit #{currentNo},#{page}">
+		 and roleName like CONCAT("%",#{name},"%")
+		</trim>
+	</select>
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smbms.provider.dao.ProviderMapper">
+	<select id="count" resultType="int">
+		select count(*) from
+		smbms_provider;
+	</select>
+	<select id="queryAll" resultType="Provider">
+		select * from smbms_provider;
+	</select>
+	<resultMap type="provider" id="providerBills">
+		<id property="id" column="id"/>
+		<collection property="bills" ofType="Bill">
+			<result property="productName" column="productName"/>
+		</collection>
+	</resultMap>
+	<select id="selBillById" resultMap="providerBills">
+		select p.*,b.productName
+		from smbms_provider p,smbms_bill b
+		where p.id=#{id} and b.providerId=p.id
+	</select>
+	<select id="selByCodeNameIfWhere" resultType="provider">
+		select * from smbms_provider 
+		<where>
+			<if test="proCode!=null and proCode!=''">
+				proCode like CONCAT("%",#{proCode},"%")
+			</if>
+			<if test="proName!=null and proName!=''">
+				and proName like CONCAT("%",#{proName},"%")
+			</if>
+		</where>
+		order by creationDate DESC
+		limit #{currentNo},#{page}
+	</select>
+	<select id="selByCodeNameContactIfChoose" resultType="provider">
+		select * from smbms_provider 
+		<where>
+			<choose>
+				<when test="proCode != null and proCode != ''">and proCode like CONCAT("%",#{proCode},"%")</when>
+				<when test="proName != null and proName != ''">and proName like CONCAT("%",#{proName},"%")</when>
+				<when test="proContact != null and proContact != ''">and proContact like CONCAT("%",#{proContact},"%")</when>
+				<otherwise>and year(creationDate)=year(now())</otherwise>
+			</choose>
+		</where>
+	</select>
+	<insert id="addOne" parameterType="provider">
+		insert into smbms_provider(id,proCode,proName,proDesc,proContact,proPhone,proAddress) values(#{provider.id},#{provider.proCode},#{provider.proName},#{provider.proDesc},#{provider.proContact},#{provider.proPhone},#{provider.proAddress});
+	</insert>
+	<update id="updateOne" parameterType="provider">
+		update smbms_provider set proCode=#{proCode},proName=#{proName},proDesc=#{proDesc},proContact=#{proContact},proPhone=#{proPhone},proAddress=#{proAddress} where id=#{id}
+	</update>
+	<update id="updateOneIfSet" parameterType="provider">
+		update smbms_provider 
+		<set><!-- 一般在修改操作中不会进行非空的验证，验证放在业务层 set只能去除proCode=#{proCode},的后缀(,)-->
+			<if test="proCode!=null and proCode!=''">proCode=#{proCode},</if>
+			<if test="proName!=null and proName!=''">proName=#{proName},</if>
+			<if test="proDesc!=null and proDesc!=''">proDesc=#{proDesc},</if>
+			<if test="proContact!=null and proContact!=''">proContact=#{proContact},</if>
+			<if test="proPhone!=null and proPhone!=''">proPhone=#{proPhone},</if>
+			<if test="proAddress!=null and proAddress!=''">proAddress=#{proAddress},</if>
+		</set>  where id=#{id}
+	</update>
+	<update id="updateOneIfTrim" parameterType="provider">
+		update smbms_provider 
+		<trim prefix="set" suffixOverrides="," suffix="where id=#{id}"><!-- 一般在修改操作中不会进行非空的验证-->
+			<if test="proCode!=null and proCode!=''">proCode=#{proCode},</if>
+			<if test="proName!=null and proName!=''">proName=#{proName},</if>
+			<if test="proDesc!=null and proDesc!=''">proDesc=#{proDesc},</if>
+			<if test="proContact!=null and proContact!=''">proContact=#{proContact},</if>
+			<if test="proPhone!=null and proPhone!=''">proPhone=#{proPhone},</if>
+			<if test="proAddress!=null and proAddress!=''">proAddress=#{proAddress},</if>
+		</trim>
+	</update>
+	<delete id="deleteOne">
+		delete from smbms_provider where id=#{id}
+	</delete>
+</mapper>
